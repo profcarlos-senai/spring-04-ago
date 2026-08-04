@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testador de API REST</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #22c55e;
+            --accent-yellow: #eab308;
+            --accent-purple: #a855f7;
+            --accent-red: #ef4444;
+            --code-bg: #090d16;
+            --input-bg: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 24px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        header {
+            text-align: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+            margin-bottom: 6px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .presets {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .preset-btn {
+            background: #273549;
+            color: var(--text-muted);
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.825rem;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            color: var(--text-main);
+            border-color: var(--accent-blue);
+            background: #334155;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input, textarea {
+            background-color: var(--input-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--accent-blue);
+        }
+
+        select {
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        option[value="GET"] { color: var(--accent-green); }
+        option[value="POST"] { color: var(--accent-yellow); }
+        option[value="PUT"] { color: var(--accent-purple); }
+        option[value="DELETE"] { color: var(--accent-red); }
+
+        .method-GET { color: var(--accent-green) !important; border-color: var(--accent-green) !important; }
+        .method-POST { color: var(--accent-yellow) !important; border-color: var(--accent-yellow) !important; }
+        .method-PUT { color: var(--accent-purple) !important; border-color: var(--accent-purple) !important; }
+        .method-DELETE { color: var(--accent-red) !important; border-color: var(--accent-red) !important; }
+
+        textarea {
+            font-family: 'Courier New', Courier, monospace;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .json-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .btn-small {
+            background: transparent;
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .btn-small:hover {
+            color: var(--text-main);
+            border-color: var(--accent-blue);
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+        }
+
+        .url-preview {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
+
+        .url-preview span {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .btn-send {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-send:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-send:active {
+            transform: scale(0.98);
+        }
+
+        /* Results Layout */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .badge-success { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .badge-error { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+        .badge-info { background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
+
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--card-border);
+            padding: 14px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #e2e8f0;
+            max-height: 400px;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .json-key { color: #7dd3fc; }
+        .json-string { color: #86efac; }
+        .json-number { color: #fde047; }
+        .json-boolean { color: #f472b6; }
+        .json-null { color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🧪 Testador de API REST</h1>
+    <p>Ferramenta simples para testes, aulas e validação de requisições HTTP</p>
+</header>
+
+<div class="container">
+
+    <!-- PAINEL DE CONFIGURAÇÃO DA REQUISIÇÃO -->
+    <div class="card">
+        <div class="card-title">
+            <span>Configurar Requisição</span>
+        </div>
+
+        <!-- Exemplos Rápidos -->
+        <div class="presets">
+            <span style="font-size: 0.8rem; color: var(--text-muted); align-self: center; margin-right: 4px;">Exemplos Rápidos:</span>
+            <button class="preset-btn" onclick="loadPreset('get')">GET pessoa</button>
+            <button class="preset-btn" onclick="loadPreset('get1')">GET pessoa/1</button>
+            <button class="preset-btn" onclick="loadPreset('post')">POST pessoa</button>
+            <button class="preset-btn" onclick="loadPreset('put')">PUT pessoa/1</button>
+            <button class="preset-btn" onclick="loadPreset('delete')">DELETE pessoa/1</button>
+        </div>
+
+        <div class="form-grid">
+            <!-- Método -->
+            <div class="form-group">
+                <label for="httpMethod">Método</label>
+                <select id="httpMethod" onchange="handleMethodChange()">
+                    <option value="GET" class="method-GET">GET</option>
+                    <option value="POST" class="method-POST">POST</option>
+                    <option value="PUT" class="method-PUT">PUT</option>
+                    <option value="DELETE" class="method-DELETE">DELETE</option>
+                </select>
+            </div>
+
+            <!-- URL do Servidor -->
+            <div class="form-group">
+                <label for="serverUrl">Servidor (Base URL)</label>
+                <input type="text" id="serverUrl" placeholder="http://localhost:8080" value="http://localhost:8080" oninput="updateUrlPreview()">
+            </div>
+
+            <!-- Endpoint -->
+            <div class="form-group">
+                <label for="endpoint">Endpoint</label>
+                <input type="text" id="endpoint" placeholder="/pessoa" value="/pessoa" oninput="updateUrlPreview()">
+            </div>
+        </div>
+
+        <!-- Corpo JSON (Para POST e PUT) -->
+        <div id="jsonContainer" class="form-group hidden" style="margin-top: 12px;">
+            <div class="json-header">
+                <label for="jsonPayload">Corpo da Requisição (JSON)</label>
+                <button class="btn-small" onclick="formatInputJson()">Formatar JSON</button>
+            </div>
+            <textarea id="jsonPayload" placeholder='{
+  "nome": "Jurema Silva",
+  "telefone": "46 98765-4321",
+  "idade": 28,
+  "dataContrato": "2023-05-12",
+  "salario": "7654,32"
+}'></textarea>
+        </div>
+
+        <!-- Rodapé do formulário -->
+        <div class="action-row">
+            <div class="url-preview">
+                URL Final: <span id="fullUrlPreview">http://localhost:8080/pessoa</span>
+            </div>
+            <button class="btn-send" onclick="sendRequest()">
+                <span id="btnText">Enviar Requisição</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- PAINEL DE RESULTADOS -->
+    <div class="results-grid">
+
+        <!-- Caixa 1: JSON / Corpo da Resposta -->
+        <div class="card">
+            <div class="card-title">
+                <span>1. Corpo da Resposta (Response Body / JSON)</span>
+            </div>
+            <pre id="responseBodyDisplay">// Aguardando resposta...</pre>
+        </div>
+
+        <!-- Caixa 2: Detalhes da Requisição Formatada -->
+        <div class="card">
+            <div class="card-title">
+                <span>2. Requisição Enviada (Request)</span>
+            </div>
+            <pre id="requestDisplay">// Clique em "Enviar Requisição" para ver os detalhes da requisição gerada...</pre>
+        </div>
+
+        <!-- Caixa 3: Informações da Resposta HTTP -->
+        <div class="card">
+            <div class="card-title">
+                <span>3. Status e Cabeçalhos da Resposta (Response Info)</span>
+            </div>
+            <div id="statusSection" class="status-bar hidden">
+                <div class="status-item">
+                    <span>Status:</span>
+                    <span id="statusCodeBadge" class="badge">---</span>
+                </div>
+                <div class="status-item">
+                    <span>Tempo:</span>
+                    <span id="responseTime" style="color: var(--accent-blue); font-weight: bold;">0 ms</span>
+                </div>
+            </div>
+            <pre id="responseHeadersDisplay">// Aguardando resposta...</pre>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Atualiza a visualização da URL final e exibe/oculta área JSON conforme o método
+    function handleMethodChange() {
+        const methodSelect = document.getElementById('httpMethod');
+        const method = methodSelect.value;
+        const jsonContainer = document.getElementById('jsonContainer');
+
+        // Atualiza cor do select
+        methodSelect.className = `method-${method}`;
+
+        // Exibe payload JSON apenas para POST e PUT
+        if (method === 'POST' || method === 'PUT') {
+            jsonContainer.classList.remove('hidden');
+        } else {
+            jsonContainer.classList.add('hidden');
+        }
+
+        updateUrlPreview();
+    }
+
+    // Atualiza o texto da URL completa preview
+    function updateUrlPreview() {
+        let baseUrl = document.getElementById('serverUrl').value.trim();
+        let endpoint = document.getElementById('endpoint').value.trim();
+
+        // Formatação de barra
+        if (baseUrl.endsWith('/') && endpoint.startsWith('/')) {
+            endpoint = endpoint.substring(1);
+        } else if (!baseUrl.endsWith('/') && !endpoint.startsWith('/') && endpoint !== '') {
+            endpoint = '/' + endpoint;
+        }
+
+        const fullUrl = baseUrl + endpoint;
+        document.getElementById('fullUrlPreview').innerText = fullUrl || 'http://...';
+        return fullUrl;
+    }
+
+    // Tenta formatar o JSON inserido pelo usuário
+    function formatInputJson() {
+        const textarea = document.getElementById('jsonPayload');
+        try {
+            if (textarea.value.trim()) {
+                const parsed = JSON.parse(textarea.value);
+                textarea.value = JSON.stringify(parsed, null, 2);
+            }
+        } catch (e) {
+            alert('JSON inválido! Verifique a sintaxe (aspas duplas, vírgulas, etc.).');
+        }
+    }
+
+    // Carrega presets de teste rápido adaptados para o recurso /pessoa
+    function loadPreset(type) {
+        const methodSelect = document.getElementById('httpMethod');
+        const serverInput = document.getElementById('serverUrl');
+        const endpointInput = document.getElementById('endpoint');
+        const jsonTextarea = document.getElementById('jsonPayload');
+
+        serverInput.value = 'http://localhost:8080';
+
+        if (type === 'get') {
+            methodSelect.value = 'GET';
+            endpointInput.value = '/pessoa';
+        } else if (type === 'get1') {
+            methodSelect.value = 'GET';
+            endpointInput.value = '/pessoa/1';
+        } else if (type === 'post') {
+            methodSelect.value = 'POST';
+            endpointInput.value = '/pessoa';
+            jsonTextarea.value = JSON.stringify({
+                nome: "Jurema Silva",
+                idade: 28,
+                email: "Jurema@email.com"
+            }, null, 2);
+        } else if (type === 'put') {
+            methodSelect.value = 'PUT';
+            endpointInput.value = '/pessoa/1';
+            jsonTextarea.value = JSON.stringify({
+                id: 1,
+                nome: "Jurema Silva Santos",
+                idade: 29,
+                email: "Jurema.santos@email.com"
+            }, null, 2);
+        } else if (type === 'delete') {
+            methodSelect.value = 'DELETE';
+            endpointInput.value = '/pessoa/1';
+        }
+
+        handleMethodChange();
+    }
+
+    // Função principal para realizar a requisição HTTP
+    async function sendRequest() {
+        const method = document.getElementById('httpMethod').value;
+        const fullUrl = updateUrlPreview();
+        const jsonPayloadText = document.getElementById('jsonPayload').value.trim();
+        const btnText = document.getElementById('btnText');
+
+        // Validação de URL
+        if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
+            alert('Por favor, informe uma URL válida começando com http:// ou https://');
+            return;
+        }
+
+        // Tratamento do Payload JSON para POST/PUT
+        let parsedBody = null;
+        if (method === 'POST' || method === 'PUT') {
+            if (jsonPayloadText) {
+                try {
+                    parsedBody = JSON.parse(jsonPayloadText);
+                } catch (e) {
+                    alert('Erro no JSON do corpo da requisição: ' + e.message);
+                    return;
+                }
+            }
+        }
+
+        // Prepare Headers
+        const headers = {};
+        if (method === 'POST' || method === 'PUT') {
+            headers['Content-Type'] = 'application/json; charset=UTF-8';
+        }
+
+        // Exibir Detalhes da Requisição Enviada (Caixa 1)
+        const requestInfo = {
+            method: method,
+            url: fullUrl,
+            headers: headers,
+            body: parsedBody
+        };
+        document.getElementById('requestDisplay').textContent = JSON.stringify(requestInfo, null, 2);
+
+        // Estado de Carregamento
+        btnText.innerText = 'Enviando...';
+        document.getElementById('responseHeadersDisplay').textContent = 'Carregando resposta...';
+        document.getElementById('responseBodyDisplay').textContent = 'Aguardando...';
+
+        const startTime = performance.now();
+
+        try {
+            const fetchOptions = {
+                method: method,
+                headers: headers
+            };
+
+            if (parsedBody && (method === 'POST' || method === 'PUT')) {
+                fetchOptions.body = JSON.stringify(parsedBody);
+            }
+
+            const response = await fetch(fullUrl, fetchOptions);
+            const endTime = performance.now();
+            const duration = Math.round(endTime - startTime);
+
+            // Exibe barra de status
+            const statusSection = document.getElementById('statusSection');
+            const statusCodeBadge = document.getElementById('statusCodeBadge');
+            const responseTime = document.getElementById('responseTime');
+            statusSection.classList.remove('hidden');
+
+            statusCodeBadge.innerText = `${response.status} ${response.statusText || ''}`;
+            responseTime.innerText = `${duration} ms`;
+
+            // Cor do Badge
+            if (response.ok) {
+                statusCodeBadge.className = 'badge badge-success';
+            } else if (response.status >= 400 && response.status < 500) {
+                statusCodeBadge.className = 'badge badge-error';
+            } else {
+                statusCodeBadge.className = 'badge badge-info';
+            }
+
+            // Processa Cabeçalhos de Resposta (Caixa 2)
+            const responseHeadersObj = {};
+            response.headers.forEach((value, key) => {
+                responseHeadersObj[key] = value;
+            });
+            document.getElementById('responseHeadersDisplay').textContent = JSON.stringify(responseHeadersObj, null, 2);
+
+            // Processa Corpo da Resposta (Caixa 3)
+            const contentType = response.headers.get('content-type') || '';
+            const responseText = await response.text();
+
+            if (contentType.includes('application/json') || isJson(responseText)) {
+                try {
+                    const jsonResponse = JSON.parse(responseText);
+                    document.getElementById('responseBodyDisplay').textContent = JSON.stringify(jsonResponse, null, 2);
+                } catch (e) {
+                    document.getElementById('responseBodyDisplay').textContent = responseText;
+                }
+            } else {
+                document.getElementById('responseBodyDisplay').textContent = responseText || '(Resposta sem corpo)';
+            }
+
+        } catch (error) {
+            const endTime = performance.now();
+            const duration = Math.round(endTime - startTime);
+
+            document.getElementById('statusSection').classList.remove('hidden');
+            const statusCodeBadge = document.getElementById('statusCodeBadge');
+            statusCodeBadge.innerText = 'ERRO / REQUISIÇÃO FALHOU';
+            statusCodeBadge.className = 'badge badge-error';
+            document.getElementById('responseTime').innerText = `${duration} ms`;
+
+            document.getElementById('responseHeadersDisplay').textContent = '// Erro de Rede ou de CORS (Cross-Origin Request Blocked).\n// Verifique se o servidor backend aceita requisições deste domínio/origem.';
+            document.getElementById('responseBodyDisplay').textContent = `Erro detalhado:\n${error.message}`;
+        } finally {
+            btnText.innerText = 'Enviar Requisição';
+        }
+    }
+
+    // Função auxiliar para testar se texto é JSON válido
+    function isJson(str) {
+        try {
+            JSON.parse(str);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // Inicializa estado da página
+    handleMethodChange();
+</script>
+</body>
+</html>
