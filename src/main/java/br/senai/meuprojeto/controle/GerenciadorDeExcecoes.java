@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestControllerAdvice
+@RestControllerAdvice // pegador de exceções do projeto
 public class GerenciadorDeExcecoes {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -19,8 +19,8 @@ public class GerenciadorDeExcecoes {
         Map<String, String> camposComErro = new HashMap<>();
 
         // Percorre todos os erros de campos detectados pelo Jakarta Validation
-        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
-            camposComErro.put(fieldError.getField(), fieldError.getDefaultMessage());
+        for (FieldError campo : ex.getBindingResult().getFieldErrors()) {
+            camposComErro.put(campo.getField(), campo.getDefaultMessage());
         }
 
         // Retorna o Record padronizado

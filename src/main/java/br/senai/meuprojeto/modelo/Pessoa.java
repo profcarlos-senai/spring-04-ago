@@ -5,10 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,13 +17,21 @@ public class Pessoa {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Nome não pode ficar em branco")
     private String nome;
-    @NotEmpty(message = "telefone não pode ficar em branco")
+
+    @NotBlank(message = "Telefone não pode ficar em branco")
     private String telefone;
+
+    @NotNull(message = "Idade é obrigatória")
+    @Positive(message = "Nem nasceu ainda e já tá cadastrado num sistema. Tadinho :'(")
     private Integer idade;
 
-    @NotNull(message = "Data do contrato não pode ficar vazia")
+    @NotNull(message = "Data de contrato é obrigatória")
+    @PastOrPresent(message = "Data de contratação não pode ser no futuro")
     private LocalDate dataContrato;
+
+    @Positive(message = "Salário deve ser maior que zero")
     private BigDecimal salario;
 
     // Construtor vazio (obrigatório para o JPA)

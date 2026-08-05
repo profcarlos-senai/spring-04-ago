@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -41,42 +42,25 @@ public class PessoaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED) // se der certo, responde com 204 (criado)
-    public ResponseEntity<?> criaPessoa(@Valid @RequestBody Pessoa pessoa) {
-        // cria um mapa de campo/erro caso tenha erros pra devolver
-        Map<String, String> erros = new HashMap<>();
-        // testa os dados
-        if (pessoa.getNome() == null || pessoa.getNome().isBlank()) {
-            erros.put("nome","Nome não pode ficar em branco");
-        }
-        if (pessoa.getIdade() != null && pessoa.getIdade() <= 0) {
-            erros.put("idade", "Nem nasceu ainda e já tá cadastrado num sistema. Tadinho :'(");
-        }
-        if (pessoa.getDataContrato().isAfter(LocalDate.now())){
-            erros.put("dataContrato", "Data de contratação não pode ser no futuro");
-        }
-        // se tiver erros, retorna 400 bad request
-        if(!erros.isEmpty()){
-            return ResponseEntity.badRequest().body(erros);
-        }
+    public Pessoa criaPessoa(@Valid @RequestBody Pessoa pessoa) {
 
         // se chegou vivo aqui, pode salvar
         pessoa = pessoaRepository.save(pessoa);
 
         // devolve a pessoa com status 200 (ok)
-        return ResponseEntity.ok(pessoa);
+        return pessoa;
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Pessoa> alteraPessoa(@PathVariable Long id, @RequestBody Pessoa pessoa) {
-        if(pessoa.getId() != null && !id.equals(pessoa.getId())){ // o cabra mandou uma id na url e outra no json
-            return ResponseEntity.badRequest().build();
+    public Pessoa alteraPessoa(@PathVariable Long id, @Valid @RequestBody Pessoa pessoa) {
+        if(!id.equals(pessoa.getId())){ // o cabra mandou uma id na url e outra no json
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não pode alterar o id");
         }
         if (!pessoaRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Id não encontrado.");
         }
         pessoa.setId(id);
-        Pessoa pessoaAtualizada = pessoaRepository.save(pessoa);
-        return ResponseEntity.ok(pessoaAtualizada);
+        return pessoaRepository.save(pessoa);
     }
 
     @DeleteMapping("{id}")
