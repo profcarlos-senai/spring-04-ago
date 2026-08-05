@@ -41,7 +41,7 @@ public class PessoaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED) // se der certo, responde com 204 (criado)
-    public ResponseEntity<?> criaPessoa(@RequestBody Pessoa pessoa) {
+    public ResponseEntity<?> criaPessoa(@Valid @RequestBody Pessoa pessoa) {
         // cria um mapa de campo/erro caso tenha erros pra devolver
         Map<String, String> erros = new HashMap<>();
         // testa os dados

@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ public class Pessoa {
     private String telefone;
     private Integer idade;
 
+    @NotNull(message = "Data do contrato não pode ficar vazia")
     private LocalDate dataContrato;
     private BigDecimal salario;
 
